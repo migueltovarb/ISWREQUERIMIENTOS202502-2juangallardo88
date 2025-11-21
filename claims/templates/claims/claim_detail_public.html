@@ -1,0 +1,137 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Detalle del Reclamo - {{ claim.number }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Reclamo #{{ claim.number }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Nombre Completo</h6>
+                            <p class="lead">{{ claim.full_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Número de Pedido</h6>
+                            <p class="lead">{{ claim.order_number|default:"No especificado" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Estado</h6>
+                            <p>
+                                <span class="badge bg-{% if claim.status == 'pending' %}warning{% elif claim.status == 'processing' %}info{% elif claim.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ claim.get_status_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Prioridad</h6>
+                            <p>
+                                <span class="badge bg-{% if claim.priority == 'urgent' %}danger{% else %}success{% endif %}">
+                                    {{ claim.get_priority_display }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Zona/Barrio</h6>
+                            <p>{{ claim.zone|default:"No especificada" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Contacto</h6>
+                            <p>{{ claim.contact }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted">Descripción del Problema</h6>
+                        <p class="lead">{{ claim.description }}</p>
+                    </div>
+
+                    {% if claim.evidence %}
+                        <div class="mb-4">
+                            <h6 class="text-muted">Evidencia (Foto/Captura)</h6>
+                            <img src="{{ claim.evidence.url }}" alt="Evidencia" class="img-fluid rounded" style="max-width: 500px;">
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Fecha de Registro</h6>
+                            <p>{{ claim.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Última Actualización</h6>
+                            <p>{{ claim.updated_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if claim.history.exists %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Historial de Cambios</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for entry in claim.history %}
+                                <div class="timeline-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ entry.changed_by.get_full_name|default:entry.changed_by.username }}</strong>
+                                            cambió el estado
+                                        </div>
+                                        <small class="text-muted">{{ entry.change_date|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    <p class="mt-2 mb-0">
+                                        <span class="badge bg-secondary">{{ entry.old_status|default:"N/A" }}</span>
+                                        <i class="fas fa-arrow-right mx-2"></i>
+                                        <span class="badge bg-primary">{{ entry.new_status }}</span>
+                                    </p>
+                                    {% if entry.note %}
+                                        <p class="mt-2 mb-0"><small>{{ entry.note }}</small></p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Información del Reclamo</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ claim.id }}</p>
+                    <p><strong>Número Único:</strong> {{ claim.number }}</p>
+                    <p><strong>Estado Actual:</strong><br>
+                        <span class="badge bg-{% if claim.status == 'pending' %}warning{% elif claim.status == 'processing' %}info{% elif claim.status == 'resolved' %}success{% else %}secondary{% endif %} w-100">
+                            {{ claim.get_status_display }}
+                        </span>
+                    </p>
+                    <hr>
+                    <p class="text-muted small">
+                        💡 <strong>Tip:</strong> Guarda este número para futuras consultas.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{% url 'claims:search' %}" class="btn btn-outline-primary w-100 mt-3">Buscar otro reclamo</a>
+            <a href="{% url 'claims:register' %}" class="btn btn-primary w-100 mt-2">Registrar nuevo reclamo</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

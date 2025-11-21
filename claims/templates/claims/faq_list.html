@@ -1,0 +1,41 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Preguntas Frecuentes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h2 class="mb-4">❓ Preguntas Frecuentes (FAQs)</h2>
+
+            {% if faqs %}
+                <div class="accordion" id="faqAccordion">
+                    {% for faq in faqs %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ faq.id }}">
+                                    {{ faq.question }}
+                                </button>
+                            </h2>
+                            <div id="faq{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    {{ faq.answer|linebreaks }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="alert alert-info mt-5">
+                    <h6 class="mb-2">💬 ¿Aún tienes preguntas?</h6>
+                    <p>Puedes contactarnos en <strong>soporte@reclamos.com</strong> o llamar al <strong>+1 234 567 890</strong></p>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <strong>📭 No hay preguntas frecuentes disponibles</strong>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

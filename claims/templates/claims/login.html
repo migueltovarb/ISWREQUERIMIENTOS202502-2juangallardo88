@@ -1,0 +1,52 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow mt-5">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">🔐 Iniciar Sesión</h3>
+                </div>
+                <div class="card-body p-5">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_username" class="form-label">Nombre de usuario</label>
+                            <input type="text" id="id_username" name="username" class="form-control form-control-lg" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_password" class="form-label">Contraseña</label>
+                            <input type="password" id="id_password" name="password" class="form-control form-control-lg" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Ingresar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center bg-light">
+                    <p class="mb-0">¿No tienes cuenta? <a href="{% url 'claims:user_register' %}" class="text-primary fw-bold">Registrarse</a></p>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <h6 class="mb-2">💡 ¿Aún no tienes cuenta?</h6>
+                <p class="mb-0">Puedes registrar un reclamo sin tener cuenta. Solo necesitas <a href="{% url 'claims:register' %}">registrar un reclamo</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

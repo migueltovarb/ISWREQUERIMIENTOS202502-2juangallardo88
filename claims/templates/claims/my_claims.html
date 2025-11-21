@@ -1,0 +1,69 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Mis Reclamos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>📋 Mis Reclamos</h2>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'claims:register' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Registrar Nuevo Reclamo
+            </a>
+        </div>
+    </div>
+
+    {% if claims %}
+        <div class="row">
+            {% for claim in claims %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ claim.number }}</h6>
+                                    <small class="text-muted">{{ claim.full_name }}</small>
+                                </div>
+                                <span class="badge bg-{% if claim.status == 'pending' %}warning{% elif claim.status == 'processing' %}info{% elif claim.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ claim.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>Prioridad:</strong>
+                                <span class="badge bg-{% if claim.priority == 'urgent' %}danger{% else %}success{% endif %}">
+                                    {{ claim.get_priority_display }}
+                                </span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Zona:</strong> {{ claim.zone }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Descripción:</strong><br>
+                                {{ claim.description|truncatewords:20 }}
+                            </p>
+                            <small class="text-muted">
+                                <i class="far fa-calendar"></i> {{ claim.created_at|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a href="{% url 'claims:claim_detail' claim.pk %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h5>📭 No tienes reclamos registrados</h5>
+            <p>Comienza registrando tu primer reclamo.</p>
+            <a href="{% url 'claims:register' %}" class="btn btn-primary">Registrar Reclamo</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

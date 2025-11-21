@@ -1,0 +1,147 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Panel Administrativo{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>📊 Panel Administrativo</h2>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'claims:admin_reports' %}" class="btn btn-info">
+                <i class="fas fa-file-pdf"></i> Generar Reportes
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Filtrar Reclamos</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-2">
+                    {{ form.status }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.priority }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.zone }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.date_from }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.date_to }}
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Reclamos -->
+    {% if claims %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Zona</th>
+                        <th>Prioridad</th>
+                        <th>Estado</th>
+                        <th>Asignado a</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                        <tr>
+                            <td><strong>{{ claim.number }}</strong></td>
+                            <td>{{ claim.full_name }}</td>
+                            <td>{{ claim.contact }}</td>
+                            <td>{{ claim.zone }}</td>
+                            <td>
+                                <span class="badge bg-{% if claim.priority == 'urgent' %}danger{% else %}success{% endif %}">
+                                    {{ claim.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if claim.status == 'pending' %}warning{% elif claim.status == 'processing' %}info{% elif claim.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ claim.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ claim.assigned_to.get_full_name|default:claim.assigned_to.username|default:"Sin asignar" }}
+                            </td>
+                            <td>{{ claim.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'claims:claim_detail' claim.pk %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal{{ claim.pk }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal para actualizar estado -->
+                        <div class="modal fade" id="modal{{ claim.pk }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Actualizar Reclamo {{ claim.number }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="post" action="{% url 'claims:update_status' claim.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Estado</label>
+                                                <select name="status" class="form-select" required>
+                                                    <option value="">Seleccionar estado</option>
+                                                    {% for value, label in form.status.field.choices %}
+                                                        {% if value != '' %}
+                                                            <option value="{{ value }}" {% if value == claim.status %}selected{% endif %}>{{ label }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Asignar a</label>
+                                                <select name="assigned_to" class="form-select">
+                                                    <option value="">Sin asignar</option>
+                                                    {% for user in form.assigned_to.field.queryset %}
+                                                        <option value="{{ user.pk }}" {% if user.pk == claim.assigned_to.pk %}selected{% endif %}>
+                                                            {{ user.get_full_name|default:user.username }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Actualizar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <strong>📭 No hay reclamos con los filtros aplicados</strong>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

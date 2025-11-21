@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Panel Admin</title>
+</head>
+<body>
+
+<h1>Panel de Administración</h1>
+
+<form method="get">
+    <select name="status">
+        <option value="">Estado</option>
+        <option value="pending">Pendiente</option>
+        <option value="processing">En proceso</option>
+        <option value="resolved">Resuelto</option>
+    </select>
+
+    <select name="priority">
+        <option value="">Prioridad</option>
+        <option value="normal">Normal</option>
+        <option value="urgent">Urgente</option>
+    </select>
+
+    <input type="text" name="zone" placeholder="Zona">
+
+    <button>Filtrar</button>
+</form>
+
+<ul>
+{% for c in claims %}
+    <li>
+        {{ c.number }} — {{ c.full_name }} — {{ c.status }}
+    </li>
+{% empty %}
+    <li>No hay reclamos</li>
+{% endfor %}
+</ul>
+
+{% if claims.has_previous %}
+<a href="?page={{ claims.previous_page_number }}">Anterior</a>
+{% endif %}
+
+{% if claims.has_next %}
+<a href="?page={{ claims.next_page_number }}">Siguiente</a>
+{% endif %}
+
+</body>
+</html>

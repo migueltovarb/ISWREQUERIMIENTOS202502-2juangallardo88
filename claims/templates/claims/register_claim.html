@@ -1,0 +1,174 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Registrar Reclamo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">📝 Registrar un Nuevo Reclamo</h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if user.is_authenticated %}
+                        <div class="alert alert-info">
+                            <strong>✓ Sesión activa:</strong> Tu reclamo será asociado a tu cuenta {{ user.username }}.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <strong>ℹ️ Sin sesión:</strong> Puedes registrar tu reclamo sin tener cuenta. Solo proporciona tu correo o teléfono.
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Sección 1: Información Personal -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">1️⃣ Información Personal</h5>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.full_name.id_for_label }}" class="form-label">{{ form.full_name.label }} <span class="text-danger">*</span></label>
+                                {% if form.full_name.errors %}
+                                    {{ form.full_name }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.full_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.full_name }}
+                                {% endif %}
+                                <small class="form-text text-muted">Ingresa tu nombre completo</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.contact_info.id_for_label }}" class="form-label">{{ form.contact_info.label }} <span class="text-danger">*</span></label>
+                                {% if form.contact_info.errors %}
+                                    {{ form.contact_info }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.contact_info.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.contact_info }}
+                                {% endif %}
+                                <small class="form-text text-muted">{{ form.contact_info.help_text }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Sección 2: Información del Reclamo -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">2️⃣ Información del Reclamo</h5>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.order_number.id_for_label }}" class="form-label">{{ form.order_number.label }}</label>
+                                {% if form.order_number.errors %}
+                                    {{ form.order_number }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.order_number.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.order_number }}
+                                {% endif %}
+                                <small class="form-text text-muted">Número de tu pedido (opcional)</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.zone.id_for_label }}" class="form-label">{{ form.zone.label }} <span class="text-danger">*</span></label>
+                                {% if form.zone.errors %}
+                                    {{ form.zone }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.zone.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.zone }}
+                                {% endif %}
+                                <small class="form-text text-muted">Barrio o zona de la ciudad</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }} <span class="text-danger">*</span></label>
+                                {% if form.description.errors %}
+                                    {{ form.description }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.description }}
+                                {% endif %}
+                                <small class="form-text text-muted">Describe tu problema en detalle</small>
+                            </div>
+                        </div>
+
+                        <!-- Sección 3: Prioridad y Evidencia -->
+                        <div class="mb-4">
+                            <h5 class="border-bottom pb-2">3️⃣ Prioridad y Evidencia</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.priority.label }} <span class="text-danger">*</span></label>
+                                {% if form.priority.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.priority.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    {% for value, label in form.priority.field.choices %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="id_priority_{{ value }}" name="priority" value="{{ value }}" {% if form.priority.value == value %}checked{% endif %}>
+                                            <label class="form-check-label" for="id_priority_{{ value }}">
+                                                {% if value == 'urgent' %}
+                                                    🚨 {{ label }} - Requiere atención inmediata
+                                                {% else %}
+                                                    📌 {{ label }} - Puede resolverse en tiempo regular
+                                                {% endif %}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.evidence.id_for_label }}" class="form-label">{{ form.evidence.label }}</label>
+                                {% if form.evidence.errors %}
+                                    {{ form.evidence }}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.evidence.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.evidence }}
+                                {% endif %}
+                                <small class="form-text text-muted">Adjunta una foto o captura de pantalla (opcional)</small>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Registrar Reclamo
+                            </button>
+                            <a href="{% url 'claims:index' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <h6 class="mb-3">💡 Consejos para tu reclamo:</h6>
+                <ul class="mb-0">
+                    <li>Sé lo más específico posible en la descripción del problema</li>
+                    <li>Incluye fechas y números de referencia si es posible</li>
+                    <li>Adjunta evidencia (fotos) para resolver más rápido</li>
+                    <li>Guarda el número de reclamo que recibirás para seguimiento</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

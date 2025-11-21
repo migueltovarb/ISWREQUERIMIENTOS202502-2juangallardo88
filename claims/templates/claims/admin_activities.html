@@ -1,0 +1,48 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Actividades del Administrador{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>📋 Historial de Actividades del Administrador</h2>
+
+    {% if activities %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Reclamo</th>
+                        <th>Descripción</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                        <tr>
+                            <td>
+                                <strong>{{ activity.user.get_full_name|default:activity.user.username }}</strong>
+                            </td>
+                            <td>{{ activity.action }}</td>
+                            <td>
+                                {% if activity.claim %}
+                                    <a href="{% url 'claims:claim_detail' activity.claim.pk %}">{{ activity.claim.number }}</a>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ activity.description|truncatewords:15 }}</td>
+                            <td>{{ activity.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4">
+            <strong>📭 No hay actividades registradas</strong>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>📊 Reportes de Reclamos</h2>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Filtrar Reportes</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Zona</label>
+                    <input type="text" name="zone" class="form-control" placeholder="Filtrar por zona" value="{{ request.GET.zone }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Prioridad</label>
+                    <select name="priority" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="normal" {% if request.GET.priority == 'normal' %}selected{% endif %}>Normal</option>
+                        <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgente</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Desde</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Hasta</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Generar Reporte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    {% if claims %}
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary">{{ claims.count }}</h3>
+                        <p class="card-text">Total de Reclamos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-danger">
+                            {% with urgent_count=claims|dictsort:"priority"|length %}
+                                {{ claims|length|add:"-1" }}
+                            {% endwith %}
+                        </h3>
+                        <p class="card-text">Reclamos Urgentes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning">
+                            {% with pending=claims|dictsort:"status"|length %}
+                                {{ pending|add:"-1" }}
+                            {% endwith %}
+                        </h3>
+                        <p class="card-text">Reclamos Pendientes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de Exportación -->
+        <div class="mb-4">
+            <h5>📥 Exportar Datos</h5>
+            <a href="{% url 'claims:admin_reports' %}?zone={{ request.GET.zone }}&priority={{ request.GET.priority }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}&export=csv" class="btn btn-success">
+                <i class="fas fa-file-csv"></i> Descargar CSV
+            </a>
+            <a href="{% url 'claims:admin_reports' %}?zone={{ request.GET.zone }}&priority={{ request.GET.priority }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}&export=pdf" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Descargar PDF
+            </a>
+        </div>
+
+        <!-- Tabla de Datos -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Número</th>
+                        <th>Cliente</th>
+                        <th>Pedido</th>
+                        <th>Zona</th>
+                        <th>Prioridad</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                        <tr>
+                            <td><strong>{{ claim.number }}</strong></td>
+                            <td>{{ claim.full_name }}</td>
+                            <td>{{ claim.order_number|default:"N/A" }}</td>
+                            <td>{{ claim.zone }}</td>
+                            <td>
+                                <span class="badge bg-{% if claim.priority == 'urgent' %}danger{% else %}success{% endif %}">
+                                    {{ claim.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if claim.status == 'pending' %}warning{% elif claim.status == 'processing' %}info{% elif claim.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                    {{ claim.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ claim.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <strong>📭 No hay datos para mostrar</strong>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

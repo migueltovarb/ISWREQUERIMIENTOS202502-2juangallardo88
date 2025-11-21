@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Detalle del Reclamo</title>
+</head>
+<body>
+
+<h1>Reclamo {{ claim.number }}</h1>
+
+<p><strong>Nombre:</strong> {{ claim.full_name }}</p>
+<p><strong>Pedido:</strong> {{ claim.order_number }}</p>
+<p><strong>Contacto:</strong> {{ claim.contact }}</p>
+<p><strong>Prioridad:</strong> {{ claim.priority }}</p>
+<p><strong>Zona:</strong> {{ claim.zone }}</p>
+<p><strong>Estado:</strong> {{ claim.status }}</p>
+<p><strong>Descripción:</strong><br>{{ claim.description }}</p>
+
+{% if claim.evidence %}
+    <img src="{{ claim.evidence.url }}" width="300">
+{% endif %}
+
+<a href="{% url 'claims:index' %}">Volver</a>
+
+</body>
+</html>

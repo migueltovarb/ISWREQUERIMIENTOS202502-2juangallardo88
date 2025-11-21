@@ -1,0 +1,63 @@
+{% extends "claims/base.html" %}
+
+{% block title %}Gestionar FAQs{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>❓ Gestionar Preguntas Frecuentes</h2>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'claims:add_faq' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Agregar FAQ
+            </a>
+        </div>
+    </div>
+
+    {% if faqs %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Orden</th>
+                        <th>Pregunta</th>
+                        <th>Respuesta</th>
+                        <th>Activo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faq in faqs %}
+                        <tr>
+                            <td>{{ faq.order }}</td>
+                            <td><strong>{{ faq.question }}</strong></td>
+                            <td>{{ faq.answer|truncatewords:10 }}</td>
+                            <td>
+                                {% if faq.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'claims:edit_faq' faq.pk %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'claims:delete_faq' faq.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <strong>📭 No hay FAQs creadas aún</strong>
+            <a href="{% url 'claims:add_faq' %}" class="btn btn-sm btn-primary mt-2">Crear primera FAQ</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
