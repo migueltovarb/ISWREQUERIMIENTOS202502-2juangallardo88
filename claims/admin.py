@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Claim, ClaimHistory, Notification, AdminActivity, FAQ
+from .models import Claim, ClaimHistory, Notification, AdminActivity, FAQ, SlopeGameScore
 
 @admin.register(Claim)
 class ClaimAdmin(admin.ModelAdmin):
@@ -48,5 +48,10 @@ class AdminActivityAdmin(admin.ModelAdmin):
 class FAQAdmin(admin.ModelAdmin):
     list_display = ('question', 'order', 'is_active')
     search_fields = ('question', 'answer')
-    list_filter = ('is_active',)
-    ordering = ('order',)
+
+@admin.register(SlopeGameScore)
+class SlopeGameScoreAdmin(admin.ModelAdmin):
+    list_display = ('player_name', 'score', 'time_survived', 'obstacles_avoided', 'created_at')
+    search_fields = ('player_name', 'user__username')
+    list_filter = ('created_at',)
+    readonly_fields = ('created_at',)

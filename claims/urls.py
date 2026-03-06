@@ -26,6 +26,11 @@ urlpatterns = [
     path("admin/faqs/<int:pk>/editar/", views.edit_faq, name="edit_faq"),
     path("admin/faqs/<int:pk>/eliminar/", views.delete_faq, name="delete_faq"),
 
+    # Juego SLOPE
+    path("juego-slope/", views.slope_game, name="slope_game"),
+    path("api/slope/guardar-puntuacion/", views.save_slope_score, name="save_slope_score"),
+    path("api/slope/leaderboard/", views.get_slope_leaderboard, name="get_slope_leaderboard"),
+
     # Autenticación
     path("login/", views.user_login, name="login"),
     path("logout/", views.user_logout, name="logout"),

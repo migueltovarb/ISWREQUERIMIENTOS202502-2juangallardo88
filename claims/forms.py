@@ -32,7 +32,7 @@ class ClaimForm(forms.ModelForm):
         description = cleaned_data.get('description')
         zone = cleaned_data.get('zone')
 
-        # Validaciones RF19
+        
         if not full_name or len(full_name.strip()) < 3:
             raise forms.ValidationError("El nombre completo debe tener al menos 3 caracteres.")
         
@@ -50,11 +50,11 @@ class ClaimForm(forms.ModelForm):
     def save(self, commit=True, user=None):
         instance = super().save(commit=False)
         
-        # Generar número único RF20
+        
         if not instance.number:
             instance.number = 'R-' + uuid.uuid4().hex[:8].upper()
         
-        # Separar email y teléfono
+        
         contact_info = self.cleaned_data.get('contact_info', '')
         if self._is_email(contact_info):
             instance.email = contact_info
@@ -65,7 +65,7 @@ class ClaimForm(forms.ModelForm):
         
         instance.contact = contact_info
         
-        # RF2: Asociar automáticamente si el usuario está autenticado
+        
         if user and user.is_authenticated:
             instance.created_by = user
         

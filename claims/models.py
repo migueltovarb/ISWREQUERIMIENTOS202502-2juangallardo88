@@ -122,3 +122,25 @@ class FAQ(models.Model):
         ordering = ['order']
         verbose_name_plural = "FAQs"
 
+
+class SlopeGameScore(models.Model):
+    """Modelo para guardar las puntuaciones del juego SLOPE"""
+    player_name = models.CharField(max_length=100)
+    score = models.IntegerField()
+    time_survived = models.FloatField()  # En segundos
+    obstacles_avoided = models.IntegerField()
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='slope_scores'
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    def __str__(self):
+        return f"{self.player_name} - {self.score}"
+    
+    class Meta:
+        ordering = ['-score', '-created_at']
+        verbose_name_plural = "Slope Game Scores"

@@ -31,12 +31,12 @@ def register_claim(request):
         form = ClaimForm(request.POST, request.FILES)
         if form.is_valid():
             claim = form.save(commit=False)
-            # RF2: Asociar automáticamente si está logueado
+            
             if request.user.is_authenticated:
                 claim.created_by = request.user
             claim.save()
             
-            # Registrar actividad si es admin
+            
             if request.user.is_authenticated and is_admin(request.user):
                 AdminActivity.objects.create(
                     user=request.user,
@@ -45,10 +45,10 @@ def register_claim(request):
                     description=f"Reclamo {claim.number} creado"
                 )
             
-            # Crear notificación inicial
+            
             _create_notification(claim, f"Tu reclamo {claim.number} ha sido registrado exitosamente.")
             
-            # RF20: Mostrar mensaje de confirmación
+            
             messages.success(request, f"¡Reclamo registrado correctamente! Tu número de reclamo es: {claim.number}")
             return redirect("claims:claim_detail_public", pk=claim.pk)
     else:
@@ -107,7 +107,7 @@ def admin_list(request):
     claims = Claim.objects.all()
     form = ClaimFilterForm(request.GET)
     
-    # Aplicar filtros
+    
     if form.is_valid():
         if form.cleaned_data.get('status'):
             claims = claims.filter(status=form.cleaned_data['status'])
@@ -462,3 +462,65 @@ def user_register(request):
             return render(request, "claims/registrer.html")
 
     return render(request, "claims/registrer.html")
+
+
+def slope_game(request):
+    """Vista para jugar al juego SLOPE"""
+    return render(request, "claims/slope_game.html")
+
+
+def save_slope_score(request):
+    """API para guardar la puntuación del juego SLOPE"""
+    if request.method == "POST":
+        try:
+            data = request.POST
+            player_name = data.get('player_name', 'Anónimo')
+            score = int(data.get('score', 0))
+            time_survived = float(data.get('time_survived', 0))
+            obstacles_avoided = int(data.get('obstacles_avoided', 0))
+            
+            from .models import SlopeGameScore
+            
+            game_score = SlopeGameScore.objects.create(
+                player_name=player_name,
+                score=score,
+                time_survived=time_survived,
+                obstacles_avoided=obstacles_avoided,
+                user=request.user if request.user.is_authenticated else None
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Puntuación guardada exitosamente',
+                'score_id': game_score.id
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+
+def get_slope_leaderboard(request):
+    """API para obtener el leaderboard del juego SLOPE"""
+    try:
+        from .models import SlopeGameScore
+        
+        scores = SlopeGameScore.objects.all()[:100]
+        
+        leaderboard = []
+        for i, score in enumerate(scores, 1):
+            leaderboard.append({
+                'rank': i,
+                'player_name': score.player_name,
+                'score': score.score,
+                'time_survived': round(score.time_survived, 2),
+                'obstacles_avoided': score.obstacles_avoided,
+                'date': score.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'leaderboard': leaderboard
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
